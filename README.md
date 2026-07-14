@@ -6,6 +6,8 @@
 ![license](https://img.shields.io/badge/license-MIT%2FISC-green)
 ![attribution](https://img.shields.io/badge/attribution-not%20required-brightgreen)
 
+[中文说明 (Chinese README)](README-zh.md) · [Live gallery](https://Mizar77.github.io/ml-paper-icons/)
+
 No more hunting on Flaticon and dodging attribution requirements. Every icon
 here comes from a permissively licensed open-source library (Lucide / Tabler /
 Phosphor / Lobe Icons), is a clean transparent SVG, and can be dropped straight
@@ -36,7 +38,7 @@ Agent/Tools, Results, Flow.
 
 ## Live gallery
 
-Open **[the gallery](https://YOUR_NAME.github.io/ml-paper-icons/)** (GitHub Pages),
+Open **[the gallery](https://Mizar77.github.io/ml-paper-icons/)** (GitHub Pages),
 or open `docs/index.html` locally. Features:
 
 - 🔎 Search by name, filter by library
