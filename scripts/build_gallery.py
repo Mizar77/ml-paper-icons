@@ -156,6 +156,7 @@ TEMPLATE = r'''<!DOCTYPE html>
     <div class="links">
       <a class="primary" href="https://github.com/Mizar77/ml-paper-icons">GitHub repo</a>
       <a href="https://github.com/Mizar77/ml-paper-icons/blob/main/README-zh.md">中文说明</a>
+      <a href="convert.html">PNG→SVG 转换器</a>
       <a href="#gallery">Browse icons ↓</a>
     </div>
     <div class="metrics">
@@ -170,7 +171,7 @@ TEMPLATE = r'''<!DOCTYPE html>
       <div class="step"><div class="t"><span>3</span>Copy</div><div class="d">Click = copy SVG (paste into draw.io/Figma as vector). Hover for PNG / download.</div></div>
     </div>
     <div class="lead" style="margin-top:14px;">Contents: mono <b>Lucide __ML__ · Tabler __MT__ · Phosphor __MP__</b> (recolorable) + <b>brand logos __CB__ · duotone __CD__</b>. Why mono defaults to black: paper figures use single-color icons recolored <b>by semantics</b> (input=blue, encoder=green, novel=red, output=amber, loss=purple).</div>
-    <div class="note-flaticon">💡 Can't find the icon you need here? Try <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon</a> — a much larger library. Note: its free tier <b>requires attribution</b> in your paper (or a paid plan to skip it), unlike the icons here which are attribution-free.<br><span style="color:var(--mut);">找不到需要的图标？可以去 <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon</a> 下载（图库更大）。注意其免费档需在论文中<b>署名</b>，或开会员免署名；本站图标则完全免署名。</span></div>
+    <div class="note-flaticon">💡 Can't find the icon you need here? Try <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon</a> — a much larger library. Note: its free tier <b>requires attribution</b> in your paper (or a paid plan to skip it), unlike the icons here which are attribution-free. Downloaded a PNG? Use the <a href="convert.html">PNG→SVG converter</a>.<br><span style="color:var(--mut);">找不到需要的图标？可以去 <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon</a> 下载（图库更大）。注意其免费档需在论文中<b>署名</b>，或开会员免署名；本站图标则完全免署名。下载的是 PNG？用 <a href="convert.html">PNG→SVG 转换器</a>转成矢量。</span></div>
   </div>
   <h2 id="gallery" style="font-size:18px;margin:28px 0 6px;">Icon gallery</h2>
   <div class="palette">
