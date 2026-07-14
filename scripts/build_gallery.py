@@ -141,6 +141,8 @@ TEMPLATE = r'''<!DOCTYPE html>
   .links{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px;}
   .links a{font-size:13px;text-decoration:none;padding:8px 14px;border-radius:8px;border:1px solid var(--line);color:var(--fg);}
   .links a.primary{background:var(--fg);color:#fff;border-color:var(--fg);}
+  .links a.cta{border-color:var(--accent);color:var(--accent);font-weight:600;}
+  .links a.cta:hover{background:var(--accent);color:#fff;}
   .links a:hover{border-color:var(--accent);}
   .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:20px 0 8px;}
   .metric{background:var(--card);border-radius:10px;padding:14px 16px;} .metric .n{font-size:24px;font-weight:600;} .metric .l{font-size:12px;color:var(--mut);margin-top:2px;}
@@ -156,7 +158,7 @@ TEMPLATE = r'''<!DOCTYPE html>
     <div class="links">
       <a class="primary" href="https://github.com/Mizar77/ml-paper-icons">GitHub repo</a>
       <a href="https://github.com/Mizar77/ml-paper-icons/blob/main/README-zh.md">中文说明</a>
-      <a href="convert.html">PNG→SVG 转换器</a>
+      <a class="cta" href="convert.html">🔗 PNG → SVG 转换器</a>
       <a href="#gallery">Browse icons ↓</a>
     </div>
     <div class="metrics">
