@@ -36,6 +36,11 @@ Organized by 12 paper-oriented themes: Vision, Audio, NLP/Text, LLM/Generation,
 Model/Architecture, Data/Storage, Training/Optim, Eval/Charts, Math/Symbols,
 Agent/Tools, Results, Flow.
 
+> **Can't find the icon you need?** Try [Flaticon](https://www.flaticon.com/) — a
+> much larger library. Note: its free tier **requires attribution** in your paper
+> (or a paid plan to skip it), and free SVGs are often locked to PNG. The icons in
+> this repo are attribution-free by contrast.
+
 ## Live gallery
 
 Open **[the gallery](https://Mizar77.github.io/ml-paper-icons/)** (GitHub Pages),

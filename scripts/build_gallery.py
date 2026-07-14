@@ -147,6 +147,7 @@ TEMPLATE = r'''<!DOCTYPE html>
   .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0 4px;}
   .step{border:1px solid var(--line);border-radius:10px;padding:14px 16px;} .step .t{font-size:13px;font-weight:600;margin-bottom:4px;} .step .d{font-size:12.5px;color:var(--mut);line-height:1.55;}
   .step .t span{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;background:var(--accent);color:#fff;border-radius:50%;font-size:11px;margin-right:6px;}
+  .note-flaticon{margin-top:16px;background:#fff8ec;border:1px solid #f4d9a6;border-radius:10px;padding:14px 16px;font-size:13.5px;line-height:1.6;color:#7a5a1e;max-width:760px;} .note-flaticon a{color:#b8791a;font-weight:600;}
 </style></head>
 <body>
   <div class="hero">
@@ -169,6 +170,7 @@ TEMPLATE = r'''<!DOCTYPE html>
       <div class="step"><div class="t"><span>3</span>Copy</div><div class="d">Click = copy SVG (paste into draw.io/Figma as vector). Hover for PNG / download.</div></div>
     </div>
     <div class="lead" style="margin-top:14px;">Contents: mono <b>Lucide __ML__ · Tabler __MT__ · Phosphor __MP__</b> (recolorable) + <b>brand logos __CB__ · duotone __CD__</b>. Why mono defaults to black: paper figures use single-color icons recolored <b>by semantics</b> (input=blue, encoder=green, novel=red, output=amber, loss=purple).</div>
+    <div class="note-flaticon">💡 Can't find the icon you need here? Try <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon</a> — a much larger library. Note: its free tier <b>requires attribution</b> in your paper (or a paid plan to skip it), unlike the icons here which are attribution-free.<br><span style="color:var(--mut);">找不到需要的图标？可以去 <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon</a> 下载（图库更大）。注意其免费档需在论文中<b>署名</b>，或开会员免署名；本站图标则完全免署名。</span></div>
   </div>
   <h2 id="gallery" style="font-size:18px;margin:28px 0 6px;">Icon gallery</h2>
   <div class="palette">

@@ -31,6 +31,10 @@
 
 按 12 个论文场景主题归类：视觉图像、语音音频、NLP文本、大模型生成、模型架构、数据存储、训练优化、评估图表、数学符号、智能体工具、结果判定、流程其他。
 
+> **找不到需要的图标？** 可以去 [Flaticon](https://www.flaticon.com/) 下载，图库大很多。
+> 注意：其免费档需要在论文中**署名**（"Icons by ... from Flaticon"），或开会员免署名；
+> 而且免费档的 SVG 常被锁成只给 PNG。本仓库的图标则完全免署名。
+
 ## 在线画廊
 
 打开 **[在线画廊](https://Mizar77.github.io/ml-paper-icons/)**（GitHub Pages），或在本地打开 `docs/index.html`。功能：
