@@ -35,7 +35,7 @@
   <div class="sub">把 Flaticon 等下载的 <b>PNG 位图图标</b> 转成 <b>可无损缩放的 SVG 矢量</b>。全程<b>在你浏览器本地完成</b>，图片不会上传任何服务器。<a href="index.html">← 返回图标库</a></div>
 
   <div class="warn">
-    ⚠️ <b>关于转换质量</b>：这是<b>描摹（tracing）</b>——把位图边缘勾成矢量路径。对 <b>Flaticon 那种扁平、单/纯色图标效果好</b>；但对渐变、复杂插画、含文字的图会失真。转出来是"描出来的矢量"，不等于原生手绘 SVG，超大放大仍可能看到细微锯齿。<br>建议：<b>用尽量大、干净、透明底的 PNG</b>（如 512px）作为输入，效果最好。
+    ⚠️ <b>关于转换质量</b>：这是<b>描摹（tracing）</b>——把位图边缘勾成矢量路径。对 <b>Flaticon 那种扁平、单/纯色图标效果好</b>；但对渐变、复杂插画、含文字的图会失真。转出来是"描出来的矢量"，不等于原生手绘 SVG。<br><b>边缘不平滑怎么办？</b>①提高"平滑度"滑块（它会加预模糊 + 用更长曲线拟合，而不是死贴像素锯齿）；②保持"小图自动放大"勾选；③尽量用<b>大而干净、透明底</b>的 PNG（≥512px）作输入。三者叠加，边缘会顺很多。
   </div>
 
   <div class="drop" id="drop">点击选择，或把 PNG 拖到这里 📎<br><span style="font-size:12px;">支持 PNG / JPG，建议透明底、≥256px</span>
@@ -50,8 +50,11 @@
         <option value="color">彩色（多色图标）</option>
       </select>
     </label>
-    <label>精细度：<span id="qval">中</span>
-      <input type="range" id="quality" min="1" max="3" step="1" value="2">
+    <label>平滑度：<span id="qval">中</span>
+      <input type="range" id="quality" min="1" max="4" step="1" value="2">
+    </label>
+    <label class="row" style="flex-direction:row;align-items:center;gap:6px;align-self:flex-end;">
+      <input type="checkbox" id="upscale" checked> 小图自动放大到 ≥512px
     </label>
     <div class="row" style="align-self:flex-end;">
       <button class="primary" id="run" disabled>转换</button>
@@ -74,7 +77,7 @@
   drop.ondragleave=function(){drop.classList.remove('over');};
   drop.ondrop=function(e){e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])load(e.dataTransfer.files[0]);};
   file.onchange=function(){if(file.files[0])load(file.files[0]);};
-  document.getElementById('quality').oninput=function(){document.getElementById('qval').textContent=['','低','中','高'][this.value];};
+  document.getElementById('quality').oninput=function(){document.getElementById('qval').textContent=['','轻','中','强','最强'][this.value];};
 
   function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},1600);}
 
@@ -99,8 +102,18 @@
 
   function opts(){
     var q=+document.getElementById('quality').value;
+    var i=q-1;
+    var base={
+      ltres:[0.5,1,1.5,2][i],
+      qtres:[0.5,1,1.5,2][i],
+      pathomit:[4,8,12,20][i],
+      rightangleenhance:false,
+      blurradius:[0,2,3,5][i],
+      blurdelta:[0,20,40,64][i],
+      roundcoords:2,
+      scale:1
+    };
     var mode=document.getElementById('mode').value;
-    var base={ltres:[1,0.6,0.3][q-1], qtres:[1,0.6,0.3][q-1], pathomit:[12,8,3][q-1], roundcoords:1, blurradius:0, scale:1};
     if(mode==='color'){ base.numberofcolors=16; base.colorsampling=2; }
     else { base.numberofcolors=2; base.colorsampling=0; base.colorquantcycles=3; }
     return {base:base, mode:mode};
@@ -111,16 +124,29 @@
     toast('转换中…');
     setTimeout(function(){
       try{
-        var c=document.createElement('canvas');
         var w=imgEl.naturalWidth, h=imgEl.naturalHeight;
-        c.width=w;c.height=h;
+        // 小图先高质量放大到 ≥512px，边缘信息更足，描摹曲线更顺
+        var scale=1;
+        if(document.getElementById('upscale').checked){
+          var minSide=Math.min(w,h);
+          if(minSide<512) scale=Math.min(4, Math.ceil(512/minSide));
+        }
+        var tw=w*scale, th=h*scale;
+        var c=document.createElement('canvas');
+        c.width=tw;c.height=th;
         var ctx=c.getContext('2d');
-        ctx.drawImage(imgEl,0,0);
-        var idata=ctx.getImageData(0,0,w,h);
+        ctx.imageSmoothingEnabled=true;
+        ctx.imageSmoothingQuality='high';
+        ctx.drawImage(imgEl,0,0,tw,th);
+        var idata=ctx.getImageData(0,0,tw,th);
         var o=opts();
         var svg=ImageTracer.imagedataToSVG(idata, o.base);
+        // 放大过就把 viewBox 归一化回原始尺寸，保证 SVG 尺寸不受放大影响
+        if(scale!==1){
+          svg=svg.replace(/width="(\d+)"\s+height="(\d+)"/,
+            'width="'+w+'" height="'+h+'" viewBox="0 0 '+tw+' '+th+'"');
+        }
         if(o.mode==='mono'){
-          // 把所有非透明填充统一成 currentColor（黑），便于后续按语义上色
           svg=svg.replace(/fill="rgb\([^)]*\)"/g,'fill="currentColor"');
           svg=svg.replace(/<svg /,'<svg color="#1a1a1a" ');
         }
@@ -128,7 +154,7 @@
         var box=document.getElementById('out');
         box.innerHTML=svg;
         var bytes=new Blob([svg]).size;
-        document.getElementById('m-out').textContent=(bytes/1024).toFixed(1)+' KB';
+        document.getElementById('m-out').textContent=(bytes/1024).toFixed(1)+' KB'+(scale!==1?(' · 放大 '+scale+'×描摹'):'');
         document.getElementById('dl').disabled=false;
         toast('完成！可预览对比');
       }catch(e){toast('转换失败：'+e.message);}
