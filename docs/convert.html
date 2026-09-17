@@ -58,6 +58,7 @@
     </label>
     <div class="row" style="align-self:flex-end;">
       <button class="primary" id="run" disabled>转换</button>
+      <button id="remove-bg" disabled>去除背景</button>
       <button id="dl" disabled>下载 SVG</button>
     </div>
   </div>
@@ -70,7 +71,8 @@
   <div id="toast"></div>
   <script src="vendor/imagetracer.js"></script>
   <script>
-  var imgDataURL=null, svgString=null, imgEl=null;
+  var imgDataURL=null, svgString=null, tracedSvgString=null, imgEl=null;
+  var backgroundColor=null, traceScale=1;
   var drop=document.getElementById('drop'), file=document.getElementById('file');
   drop.onclick=function(){file.click();};
   drop.ondragover=function(e){e.preventDefault();drop.classList.add('over');};
@@ -93,7 +95,9 @@
         document.getElementById('m-in').textContent=imgEl.naturalWidth+'×'+imgEl.naturalHeight+' px';
         document.getElementById('run').disabled=false;
         document.getElementById('out').textContent='点"转换"生成 SVG';
+        document.getElementById('remove-bg').disabled=true;
         document.getElementById('dl').disabled=true;
+        tracedSvgString=null;svgString=null;backgroundColor=null;
       };
       imgEl.src=imgDataURL;
     };
@@ -119,6 +123,75 @@
     return {base:base, mode:mode};
   }
 
+  function estimateBackground(idata){
+    var w=idata.width, h=idata.height, d=idata.data;
+    var size=Math.max(1,Math.min(12,Math.round(Math.min(w,h)*0.04)));
+    var corners=[[0,0],[w-size,0],[0,h-size],[w-size,h-size]];
+    var samples=corners.map(function(pos){
+      var sum=[0,0,0,0], count=0;
+      for(var y=pos[1];y<pos[1]+size;y++){
+        for(var x=pos[0];x<pos[0]+size;x++){
+          var i=(y*w+x)*4;
+          for(var c=0;c<4;c++)sum[c]+=d[i+c];
+          count++;
+        }
+      }
+      return sum.map(function(v){return Math.round(v/count);});
+    });
+    function dist(a,b){
+      var dr=a[0]-b[0],dg=a[1]-b[1],db=a[2]-b[2],da=a[3]-b[3];
+      return Math.sqrt(dr*dr+dg*dg+db*db+da*da);
+    }
+    return samples.sort(function(a,b){
+      var ad=0,bd=0;
+      samples.forEach(function(s){ad+=dist(a,s);bd+=dist(b,s);});
+      return ad-bd;
+    })[0];
+  }
+
+  function estimateForeground(idata,bg){
+    var d=idata.data, best=[0,0,0,255], bestDistance=-1;
+    for(var i=0;i<d.length;i+=4){
+      var dr=d[i]-bg[0],dg=d[i+1]-bg[1],db=d[i+2]-bg[2],da=d[i+3]-bg[3];
+      var distance=dr*dr+dg*dg+db*db+da*da;
+      if(distance>bestDistance){
+        bestDistance=distance;
+        best=[d[i],d[i+1],d[i+2],d[i+3]];
+      }
+    }
+    return best;
+  }
+
+  function applyMode(svg,mode){
+    if(mode!=='mono')return svg;
+    svg=svg.replace(/fill="rgb\([^)]*\)"/g,'fill="currentColor"');
+    return svg.replace(/<svg /,'<svg color="#1a1a1a" ');
+  }
+
+  function removeBackground(svg,bg){
+    var doc=new DOMParser().parseFromString(svg,'image/svg+xml');
+    if(doc.querySelector('parsererror'))throw new Error('无法解析生成的 SVG');
+    var removed=0;
+    Array.from(doc.querySelectorAll('path')).forEach(function(path){
+      var opacity=parseFloat(path.getAttribute('opacity')||'1');
+      var match=(path.getAttribute('fill')||'').match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+      if(!match)return;
+      var dr=+match[1]-bg[0],dg=+match[2]-bg[1],db=+match[3]-bg[2];
+      var sameColor=Math.sqrt(dr*dr+dg*dg+db*db)<=45;
+      var transparent=bg[3]<16&&opacity<0.08;
+      if(sameColor||transparent){path.remove();removed++;}
+    });
+    return {svg:new XMLSerializer().serializeToString(doc.documentElement),removed:removed};
+  }
+
+  function renderSvg(svg,note){
+    svgString=svg;
+    document.getElementById('out').innerHTML=svg;
+    var bytes=new Blob([svg]).size;
+    document.getElementById('m-out').textContent=(bytes/1024).toFixed(1)+' KB'+(traceScale!==1?(' · 放大 '+traceScale+'×描摹'):'')+(note||'');
+    document.getElementById('dl').disabled=false;
+  }
+
   document.getElementById('run').onclick=function(){
     if(!imgEl)return;
     toast('转换中…');
@@ -140,25 +213,39 @@
         ctx.drawImage(imgEl,0,0,tw,th);
         var idata=ctx.getImageData(0,0,tw,th);
         var o=opts();
+        backgroundColor=estimateBackground(idata);
+        if(o.mode!=='color'){
+          var foregroundColor=estimateForeground(idata,backgroundColor);
+          o.base.pal=[
+            {r:backgroundColor[0],g:backgroundColor[1],b:backgroundColor[2],a:backgroundColor[3]},
+            {r:foregroundColor[0],g:foregroundColor[1],b:foregroundColor[2],a:foregroundColor[3]}
+          ];
+        }
         var svg=ImageTracer.imagedataToSVG(idata, o.base);
         // 放大过就把 viewBox 归一化回原始尺寸，保证 SVG 尺寸不受放大影响
         if(scale!==1){
           svg=svg.replace(/width="(\d+)"\s+height="(\d+)"/,
             'width="'+w+'" height="'+h+'" viewBox="0 0 '+tw+' '+th+'"');
         }
-        if(o.mode==='mono'){
-          svg=svg.replace(/fill="rgb\([^)]*\)"/g,'fill="currentColor"');
-          svg=svg.replace(/<svg /,'<svg color="#1a1a1a" ');
-        }
-        svgString=svg;
-        var box=document.getElementById('out');
-        box.innerHTML=svg;
-        var bytes=new Blob([svg]).size;
-        document.getElementById('m-out').textContent=(bytes/1024).toFixed(1)+' KB'+(scale!==1?(' · 放大 '+scale+'×描摹'):'');
-        document.getElementById('dl').disabled=false;
+        tracedSvgString=svg;
+        traceScale=scale;
+        renderSvg(applyMode(svg,o.mode),'');
+        document.getElementById('remove-bg').disabled=false;
         toast('完成！可预览对比');
       }catch(e){toast('转换失败：'+e.message);}
     },50);
+  };
+
+  document.getElementById('remove-bg').onclick=function(){
+    if(!tracedSvgString||!backgroundColor)return;
+    try{
+      var result=removeBackground(tracedSvgString,backgroundColor);
+      if(!result.removed){toast('没有检测到可去除的背景');return;}
+      tracedSvgString=result.svg;
+      renderSvg(applyMode(result.svg,document.getElementById('mode').value),' · 已去除背景');
+      this.disabled=true;
+      toast('已去除背景（'+result.removed+' 个区域）');
+    }catch(e){toast('去除背景失败：'+e.message);}
   };
 
   document.getElementById('dl').onclick=function(){
